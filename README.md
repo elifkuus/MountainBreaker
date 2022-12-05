@@ -1,2 +1,2 @@
-# Mountain-Breaker
+# Mountain Breaker
 Inspired by Count Master.
