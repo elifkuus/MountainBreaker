@@ -21,26 +21,33 @@ public class PlayerController : MonoBehaviour
 
 
     private Rigidbody rb;
-
+    private Animator anim;
 
     private int numberChild = 0;
+    private bool isFinished = false;
 
 
-    void Start()
+    private void Awake()
     {
         playerTransform = transform;
 
         rb = GetComponent<Rigidbody>();
+        anim = GetComponent<Animator>();
+
         countStickmans = transform.childCount - 2;
-
-
     }
 
     // Update is called once per frame
     void Update()
     {
-        MovePlayer();
-        numberStickmans = gameObject.GetComponentInChildren<Counter>().counterPlayer;
+        if (!isFinished)
+        {
+            anim.SetBool("run", true);
+            MovePlayer();
+            numberStickmans = gameObject.GetComponentInChildren<Counter>().counterPlayer;
+
+        }
+       
 
     }
     public void MovePlayer()
@@ -59,7 +66,7 @@ public class PlayerController : MonoBehaviour
             float z = DistanceFactor * Mathf.Sqrt(i) * Mathf.Sin(i * Radius);
 
             Vector3 newPos = new Vector3(x, 0f, z);
-            playerTransform.GetChild(i).localPosition=newPos;
+            playerTransform.GetChild(i).localPosition = newPos;
 
 
         }
@@ -76,9 +83,8 @@ public class PlayerController : MonoBehaviour
     }
     public void ReduceStickman()
     {
-        gameObject.GetComponentInChildren<Counter>().counterPlayer -= 1;
+        gameObject.GetComponentInChildren<Counter>().counterPlayer = playerTransform.childCount - 3;
         FormatStickman();
-        
     }
 
     private void OnTriggerExit(Collider other)
@@ -86,8 +92,39 @@ public class PlayerController : MonoBehaviour
         if (other.CompareTag("Gate"))
         {
             numberChild = numberStickmans - countStickmans;
-
             AddStickman(numberChild);
+
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("FinishMountain"))
+        {
+            isFinished = true;
+            anim.SetBool("run", false);
+
+
+            for (int i = 3; i < playerTransform.childCount; i++)
+            {
+                Debug.Log("numberStickmans " + numberStickmans);
+                gameObject.transform.GetChild(i).gameObject.SetActive(false);
+            }
+
+            if (playerTransform.childCount < 10)
+            {
+                gameObject.transform.localScale = Vector3.one * 1.25f;
+            }
+            else if (playerTransform.childCount < 50)
+            {
+                gameObject.transform.localScale = Vector3.one * 2f;
+
+            }
+            else
+            {
+                gameObject.transform.localScale = Vector3.one * 4f;
+
+            }
 
         }
     }
